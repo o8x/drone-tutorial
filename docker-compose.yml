@@ -1,0 +1,37 @@
+version: '3'
+services:
+    drone-server:
+        image: drone/drone
+        ports:
+            - 3005:80
+        volumes:
+            - /var/lib/drone:/data
+        environment:
+            - DRONE_GOGS_SERVER=http://1.1.2.3:2048
+            - DRONE_RPC_SECRET=xh1HJLO2yfandlwjeHdsL3Kklwheour89
+            - DRONE_SERVER_HOST=0.0.0.0
+            - DRONE_SERVER_PROTO=http
+
+    drone-agent:
+        image: drone/agent
+        depends_on:
+            - drone-server
+        environment:
+            - DRONE_RPC_SERVER=http://drone-server
+            - DRONE_RPC_SECRET=xh1HJLO2yfandlwjeHdsL3Kklwheour89
+            - DOCKER_HOST=tcp://172.17.0.1:2375
+        links:
+            - drone-server
+
+    drone-ssh:
+        image: drone/drone-runner-ssh
+        depends_on:
+            - drone-server
+        environment:
+            - DRONE_RPC_PROTO=http
+            - DRONE_RPC_HOST=drone-server
+            - DRONE_RPC_SECRET=xh1HJLO2yfandlwjeHdsL3Kklwheour89
+        ports:
+            - 3000:3000
+        links:
+            - drone-server

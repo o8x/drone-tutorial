@@ -1,0 +1,39 @@
+---
+kind: pipeline
+name: Hello World
+steps:
+    -   name: Hello World
+        image: centos
+        environment:
+            VARPATH: /var
+            LOGPATH:
+                from_secret: log-path
+        commands:
+            - echo $${VARPATH}
+            - echo $${LOGPATH}
+            - ls $${LOGPATH}
+
+---
+
+kind: pipeline
+type: ssh
+name: Ssh-Runner
+
+server:
+    host: xxx.org
+    user: root
+    password:
+        from_secret: password
+
+steps:
+    -   name: list
+        commands:
+            - ls /var
+    -   name: npm
+        environment:
+            PATH: "$$PATH:/opt/node-v14.3.0-linux-x64/bin/"
+        commands:
+            - pwd
+            - node --version
+            - npm version
+            - npm install
